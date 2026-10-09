@@ -1,0 +1,107 @@
+openapi: 3.1.0
+info:
+  title: Regel Kommuniceringsutfall API
+  version: 1.0.0
+  description: >
+    Hanterar registrering av kommuniceringsutfall.
+
+security:
+  - bearerAuth: []
+
+paths:
+  /kommuniceringsutfall/{handlaggningId}:
+    patch:
+      tags: [KommuniceringsutfallController]
+      operationId: patchKommuniceringsutfall
+      summary: Registrera kommuniceringsutfall
+      description: >
+        Registrerar handläggarens utfall av kommuniceringen.
+      parameters:
+        - $ref: "#/components/parameters/HandlaggningId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchKommuniceringsutfallRequest"
+      responses:
+        "204":
+          description: Kommuniceringsutfall registrerat OK
+        "400":
+          description: Ogiltig begäran
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Ej autentiserad
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Åtkomst nekad
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Handläggningsärendet hittades inte
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internt serverfel
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: Bearer-token utfärdat av identitetsleverantören. Ramverket extraherar handläggarens identitet från token.
+
+  parameters:
+    HandlaggningId:
+      name: handlaggningId
+      in: path
+      required: true
+      description: ID för handläggningsärendet
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          description: HTTP-statuskod
+          example: 404
+        message:
+          type: string
+          description: Beskrivning av felet
+          example: Handläggningsärendet hittades inte
+
+    Kommuniceringsutfall:
+      type: string
+      enum:
+        - NekatBestridande
+        - AccepteratBestridande
+        - KundAccepterat
+
+    PatchKommuniceringsutfallRequest:
+      type: object
+      required:
+        - utfall
+      properties:
+        utfall:
+          $ref: "#/components/schemas/Kommuniceringsutfall"
